@@ -1,6 +1,6 @@
 # Py Gaming
 
-This is an excercise project to learn python.
+This is an exercise project to learn python.
 
 ## Requirements
 
