@@ -2,6 +2,12 @@
 
 This is an excercise project to learn python.
 
+## Requirements
+
+- Python 3.7
+- pytest
+- click
+
 ## Progress
 
 Split out board code into it's own module (`from board import Board`).
