@@ -20,17 +20,42 @@ def translate_coordinates(x, y):
 
 
 class Character:
+    RADIUS = 10
+
     def __init__(self):
-        self.x = 0
+        self.x = 120
+        self.y = 90
         self.direction = 1
+        self.fall_speed = 0
 
     def draw_character(self):
-        x = 20 + self.x
-        y = 20
-        body_x, body_y = translate_coordinates(x, y)
-        pyxel.circ(body_x, body_y, 10, Color.WHITE)
-        eye_x, eye_y = translate_coordinates(x + 5 * self.direction, y + 5)
+        body_x, body_y = translate_coordinates(
+            self.x,
+            self.y,
+        )
+        pyxel.circ(
+            body_x,
+            body_y,
+            Character.RADIUS,
+            Color.WHITE,
+        )
+        eye_x, eye_y = translate_coordinates(
+            self.x + 5 * self.direction,
+            self.y + 5,
+        )
         pyxel.circ(eye_x, eye_y, 2, Color.DARK_BLUE)
+
+    @property
+    def bottom(self):
+        return self.y - Character.RADIUS
+
+    @property
+    def left(self):
+        return self.x - Character.RADIUS
+
+    @property
+    def right(self):
+        return self.x + Character.RADIUS
 
 
 class Brick:
@@ -69,6 +94,9 @@ character = Character()
 bricks = [
     Brick(Brick.SIZE * i, 0)
     for i in range(10)
+] + [
+    Brick(100 + Brick.SIZE * i, 35)
+    for i in range(4)
 ]
 
 
@@ -81,13 +109,56 @@ def update():
     if pyxel.btn(pyxel.KEY_RIGHT):
         character.x += 1
         character.direction = 1
+    collides_with_brick = [
+        is_on_brick(character, brick)
+        for brick in bricks
+    ]
+    if pyxel.btnp(pyxel.KEY_SPACE):
+        character.fall_speed = -3.7
+    if any(collides_with_brick) and character.fall_speed > 0:
+        character.fall_speed = 0
+    else:
+        fall()
 
 
 def draw_game():
     pyxel.cls(Color.LIGHT_BLUE)
-    character.draw_character()
     for brick in bricks:
         brick.draw_brick()
+    character.draw_character()
+
+
+def is_on_brick(char, brick):
+    if char.bottom - 1 != brick.top:
+        return False
+    return is_same_x_range(char, brick)
+
+
+def is_same_x_range(char, brick):
+    if char.right < brick.left:
+        return False
+    if char.left > brick.right:
+        return False
+    return True
+
+
+def fall():
+    same_x_range_bricks = [
+        brick
+        for brick in bricks
+        if is_same_x_range(character, brick)
+    ]
+    under_bricks = [
+        brick
+        for brick in same_x_range_bricks
+        if character.bottom >= brick.top
+    ]
+    distances = [
+        character.bottom - brick.top - 1
+        for brick in under_bricks
+    ]
+    character.y -= min(distances + [character.fall_speed])
+    character.fall_speed += 0.19
 
 
 if __name__ == '__main__':
