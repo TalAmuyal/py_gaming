@@ -167,6 +167,33 @@ class Brick:
         return self.x + Brick.SIZE - 1
 
 
+class Cloud:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def draw(self):
+        radius = 5
+        coordinates = [
+            (0, 0),
+            (8, 0),
+            (-8, 0),
+            (4, 3),
+            (-4, 3),
+        ]
+        for x, y in coordinates:
+            translated_x, translated_y = translate_coordinates(
+                self.x + x,
+                self.y + y,
+            )
+            pyxel.circ(
+                translated_x,
+                translated_y,
+                radius,
+                Color.WHITE,
+            )
+
+
 def update():
     if pyxel.btnp(pyxel.KEY_Q):
         pyxel.quit()
@@ -200,6 +227,8 @@ def draw_game():
     pyxel.cls(Color.LIGHT_BLUE)
     for brick in bricks:
         brick.draw_brick()
+    for cloud in clouds:
+        cloud.draw()
     door.draw()
     character.draw_character()
     if is_game_over(character):
@@ -267,6 +296,11 @@ if __name__ == '__main__':
     ] + [
         Brick(170 + Brick.SIZE * i, 70)
         for i in range(8)
+    ]
+    clouds = [
+        Cloud(70, 160),
+        Cloud(120, 140),
+        Cloud(240, 170),
     ]
 
     pyxel.run(update, draw_game)
