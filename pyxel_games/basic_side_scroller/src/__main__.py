@@ -6,6 +6,8 @@ import pyxel
 WINDOW_WIDTH = 225
 WINDOW_HEIGHT = 120
 
+STARTING_POSITION = (120, 90)
+
 
 class Color:
     BLACK = 0
@@ -48,11 +50,16 @@ class Character:
     HEIGHT = 2 * RADIUS + 1
 
     def __init__(self):
-        self.x = 120
-        self.y = 90
+        self.x, self.y = STARTING_POSITION
         self.direction = 1
         self.fall_speed = 0
-        self.double_jumped = False
+        self.double_jumped = True
+
+    def reset(self, position):
+        self.x, self.y = position
+        self.direction = 1
+        self.fall_speed = 0
+        self.double_jumped = True
 
     def draw_character(self):
         body_x, body_y = translate_coordinates(
@@ -145,6 +152,9 @@ def update():
         pyxel.quit()
     if is_game_over(character):
         return
+    if has_fallen_out(character):
+        life.count -= 1
+        character.reset(STARTING_POSITION)
     if pyxel.btn(pyxel.KEY_LEFT):
         character.x -= 1
         character.direction = -1
@@ -211,8 +221,12 @@ def fall():
     character.fall_speed += 0.19
 
 
-def is_game_over(char):
+def has_fallen_out(char):
     return char.top <= 0
+
+
+def is_game_over(char):
+    return has_fallen_out(char) and life.count == 0
 
 
 if __name__ == '__main__':
