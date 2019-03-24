@@ -6,7 +6,7 @@ import pyxel
 WINDOW_WIDTH = 225
 WINDOW_HEIGHT = 120
 
-STARTING_POSITION = (120, 90)
+STARTING_POSITION = (120.0, 90.0)
 
 
 class Color:
@@ -21,7 +21,26 @@ class Color:
     LIGHT_BLUE = 12
 
 
-def translate_coordinates(x, y):
+def translate_coordinates(x, y, character_relative=True):
+    if character_relative:
+        x, y = translate_character_to_center(x, y)
+        x, y = translate_character_coordinates(x, y)
+    return translate_coordinates_to_pyxel(x, y)
+
+
+def translate_character_coordinates(x, y):
+    min_char_x = WINDOW_WIDTH / 2
+    min_char_y = WINDOW_HEIGHT / 2
+    bordered_char_x = max(character.x, min_char_x)
+    bordered_char_y = max(character.y, min_char_y)
+    return x - bordered_char_x, y - bordered_char_y
+
+
+def translate_character_to_center(x, y):
+    return x + WINDOW_WIDTH / 2, y + WINDOW_HEIGHT / 2
+
+
+def translate_coordinates_to_pyxel(x, y):
     return x, WINDOW_HEIGHT - y - 1
 
 
@@ -40,6 +59,7 @@ class Life:
             x, y = translate_coordinates(
                 Life.X + offset,
                 Life.Y,
+                character_relative=False,
             )
             pyxel.circ(x, y, Life.RADIUS, Color.RED)
 
@@ -234,7 +254,7 @@ if __name__ == '__main__':
 
     life = Life()
     door = Door(
-        left=170 + Brick.SIZE * 3 - Door.WIDTH,
+        left=170 + Brick.SIZE * 7 - Door.WIDTH,
         bottom=70 + Brick.SIZE,
     )
     character = Character()
@@ -246,7 +266,7 @@ if __name__ == '__main__':
         for i in range(4)
     ] + [
         Brick(170 + Brick.SIZE * i, 70)
-        for i in range(3)
+        for i in range(8)
     ]
 
     pyxel.run(update, draw_game)
